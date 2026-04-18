@@ -16,6 +16,7 @@ import BusinessView from './components/Planner/views/BusinessView';
 import VisionView from './components/Planner/views/VisionView';
 import ChoresView from './components/Planner/views/ChoresView';
 import NotesView from './components/Planner/views/NotesView';
+import ProjectsView from './components/Planner/views/ProjectsView';
 import { ViewType } from './components/Planner/types';
 import { useTasks } from './components/Planner/useTasks';
 import { usePlannerData, INITIAL_DATA } from './components/Planner/usePlannerData';
@@ -30,7 +31,7 @@ export default function App() {
   const [activeDate, setActiveDate] = useState(new Date().toISOString());
   const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
 
-  const { data, loading, user, updateOwnerName, updateYearly, updateMonthly, updateWeekly, updateDaily, updateCurrent, updateStudy, updateBusinessIdeas, updateVisionBoard, addTask, deleteTask, toggleTaskCompletion, updateChores, updateTheme, updateNotes } = usePlannerData();
+  const { data, loading, user, updateOwnerName, updateYearly, updateMonthly, updateWeekly, updateDaily, updateCurrent, updateStudy, updateBusinessIdeas, updateVisionBoard, addTask, deleteTask, toggleTaskCompletion, updateChores, updateTheme, updateNotes, updateProjects } = usePlannerData();
   const { getTasksForDate } = useTasks(data.tasks);
 
   if (loading) {
@@ -186,6 +187,14 @@ export default function App() {
           <NotesView 
             notes={data.notes || []}
             onUpdate={updateNotes}
+            theme={data.theme || 'light'}
+          />
+        );
+      case 'projects':
+        return (
+          <ProjectsView
+            projects={data.projects || []}
+            onUpdate={updateProjects}
             theme={data.theme || 'light'}
           />
         );

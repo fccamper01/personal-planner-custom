@@ -11,7 +11,8 @@ export type ViewType =
   | 'tv' 
   | 'notes'
   | 'business'
-  | 'chores';
+  | 'chores'
+  | 'projects';
 
 export type VisionBoardItem = {
   id: string;
@@ -107,10 +108,19 @@ export interface Note {
   updatedAt: string;
 }
 
+export interface ProjectItem {
+  id: string;
+  title: string;
+  content: string;
+  color: string;
+  updatedAt: string;
+}
+
 export interface PlannerData {
   ownerName: string;
   theme: ThemeType;
   notes: Note[];
+  projects: ProjectItem[];
   yearly: {
     [year: string]: {
       months: { [monthIndex: number]: string[] }; // Array of 6 lines for each month

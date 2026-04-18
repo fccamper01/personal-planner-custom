@@ -105,7 +105,7 @@ export default function NotesView({ notes, onUpdate, theme }: NotesViewProps) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-12 pb-24">
+    <div className="w-full space-y-12 pb-24">
       {/* Header */}
       <div className="flex flex-col items-center text-center space-y-4">
         <h1 className={cn(

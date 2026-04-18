@@ -83,7 +83,7 @@ export default function ChoresView({ data, onUpdate, theme }: ChoresViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full space-y-8 max-w-4xl mx-auto pb-12">
+    <div className="flex flex-col h-full space-y-8 w-full pb-12">
       {/* Header Row */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">

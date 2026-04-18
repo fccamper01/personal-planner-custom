@@ -108,7 +108,7 @@ export default function CurrentView({ data, onUpdate, theme }: CurrentViewProps)
   const totalCompleted = Object.values(data.weeklyProgress || {}).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="flex flex-col h-full space-y-4 max-w-4xl mx-auto pb-8">
+    <div className="flex flex-col h-full space-y-4 w-full pb-8">
       {/* Quote Header */}
       <div className={cn(
         "rounded-[2.5rem] p-8 relative overflow-hidden flex flex-col items-center justify-center border-4 shadow-md transition-all duration-500",
@@ -136,12 +136,13 @@ export default function CurrentView({ data, onUpdate, theme }: CurrentViewProps)
 
       {/* Target Boxes */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* TARGET */}
         <div className={cn(
           "rounded-2xl p-4 flex flex-col items-center justify-center space-y-1 shadow-sm border-2 transition-all duration-500 bg-white",
           theme === 'dark' && "bg-white/5 border-white/10 text-white",
           theme === 'medium' && "bg-white border-slate-200 text-slate-600"
         )}>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 text-slate-500">TARGET</span>
+          <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-60", theme === 'dark' ? "text-white" : "text-slate-500")}>TARGET</span>
           <input
             value={data.target}
             onChange={(e) => onUpdate({ ...data, target: e.target.value })}
@@ -151,40 +152,52 @@ export default function CurrentView({ data, onUpdate, theme }: CurrentViewProps)
             )}
           />
         </div>
+        {/* STATUS */}
         <div className={cn(
           "rounded-2xl p-4 flex flex-col items-center justify-center space-y-1 shadow-sm border-2 transition-all duration-500 bg-[#f9bcd3]/80",
           theme === 'dark' && "bg-white/5 border-white/10 text-white",
           theme === 'medium' && "bg-white border-slate-200 text-slate-600"
         )}>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 text-white">STATUS</span>
+          <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-60", theme === 'dark' ? "text-white" : (theme === 'medium' ? "text-slate-500" : "text-white/90 mix-blend-color-burn text-pink-900"))}>STATUS</span>
           <input
             value={data.status}
             onChange={(e) => onUpdate({ ...data, status: e.target.value })}
-            className="text-center bg-transparent border-none outline-none text-[12px] font-black w-full text-white contrast-150"
+            className={cn(
+              "text-center bg-transparent border-none outline-none text-[12px] font-black w-full",
+              theme === 'dark' ? "text-white" : "text-slate-700"
+            )}
           />
         </div>
+        {/* REWARD */}
         <div className={cn(
           "rounded-2xl p-4 flex flex-col items-center justify-center space-y-1 shadow-sm border-2 transition-all duration-500 bg-[#d1c1dc]/80",
           theme === 'dark' && "bg-white/5 border-white/10 text-white",
           theme === 'medium' && "bg-white border-slate-200 text-slate-600"
         )}>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 text-white">REWARD</span>
+          <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-60", theme === 'dark' ? "text-white" : (theme === 'medium' ? "text-slate-500" : "text-white/90 mix-blend-color-burn text-purple-900"))}>REWARD</span>
           <input
             value={data.reward}
             onChange={(e) => onUpdate({ ...data, reward: e.target.value })}
-            className="text-center bg-transparent border-none outline-none text-[12px] font-black w-full text-white contrast-125"
+            className={cn(
+              "text-center bg-transparent border-none outline-none text-[12px] font-black w-full",
+              theme === 'dark' ? "text-white" : "text-slate-700"
+            )}
           />
         </div>
+        {/* PUNISHMENT */}
         <div className={cn(
           "rounded-2xl p-4 flex flex-col items-center justify-center space-y-1 shadow-sm border-2 transition-all duration-500 bg-[#ffd9a1]/80",
           theme === 'dark' && "bg-white/5 border-white/10 text-white",
           theme === 'medium' && "bg-white border-slate-200 text-slate-600"
         )}>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-60 text-white">PUNISHMENT</span>
+          <span className={cn("text-[9px] font-black uppercase tracking-[0.2em] opacity-60", theme === 'dark' ? "text-white" : (theme === 'medium' ? "text-slate-500" : "text-white/90 mix-blend-color-burn text-orange-900"))}>PUNISHMENT</span>
           <input
             value={data.punishment}
             onChange={(e) => onUpdate({ ...data, punishment: e.target.value })}
-            className="text-center bg-transparent border-none outline-none text-[12px] font-black w-full text-white contrast-150"
+            className={cn(
+              "text-center bg-transparent border-none outline-none text-[12px] font-black w-full",
+              theme === 'dark' ? "text-white" : "text-slate-700"
+            )}
           />
         </div>
       </div>

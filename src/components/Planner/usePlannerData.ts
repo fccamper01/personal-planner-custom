@@ -9,6 +9,7 @@ export const INITIAL_DATA: PlannerData = {
   ownerName: '',
   theme: 'light',
   notes: [],
+  projects: [],
   yearly: {},
   monthly: {},
   weekly: {},
@@ -265,6 +266,12 @@ export function usePlannerData() {
     syncData(newData);
   }, [data, syncData]);
 
+  const updateProjects = useCallback((projects: any[]) => {
+    const newData = { ...data, projects };
+    setData(newData);
+    syncData(newData);
+  }, [data, syncData]);
+
   const addTask = useCallback((task: Omit<Task, 'id' | 'completedDates'>) => {
     const newTask: Task = {
       ...task,
@@ -334,6 +341,7 @@ export function usePlannerData() {
     toggleTaskCompletion,
     updateChores,
     updateTheme,
-    updateNotes
+    updateNotes,
+    updateProjects
   };
 }
