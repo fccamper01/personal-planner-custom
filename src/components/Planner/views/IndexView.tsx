@@ -104,12 +104,12 @@ export default function IndexView({ onViewChange, user, ownerName, onUpdateOwner
 
       {/* Footer Controls / Logged In info */}
       <div className={cn(
-        "rounded-[1.5rem] p-4 border-2 shadow-lg flex items-center justify-between mt-auto transition-all duration-500",
+        "rounded-[1.5rem] p-4 border-2 shadow-lg flex flex-col md:flex-row items-center justify-between mt-auto transition-all duration-500 gap-4 md:gap-0",
         theme === 'dark' ? "bg-white/5 border-white/10" : "bg-white/80 backdrop-blur-md border-[#FFF9F2]",
         theme === 'medium' && "bg-white border-slate-200"
       )}>
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-[#ffd9a1] overflow-hidden border-2 border-white shadow-sm">
+        <div className="flex items-center space-x-3 w-full md:w-auto justify-center md:justify-start">
+          <div className="w-10 h-10 rounded-lg bg-[#ffd9a1] overflow-hidden border-2 border-white shadow-sm shrink-0">
              <img src={user?.photoURL || "https://picsum.photos/seed/planner/100/100"} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           </div>
           <div className="flex flex-col">
@@ -125,7 +125,7 @@ export default function IndexView({ onViewChange, user, ownerName, onUpdateOwner
           </div>
         </div>
 
-        <div className="flex items-center space-x-6">
+        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full md:w-auto justify-center md:justify-end">
           <div className="flex items-center bg-slate-100 rounded-2xl p-1 border-2 border-white shadow-inner">
             {[
               { id: 'light', icon: Sun, label: 'LIGHT' },

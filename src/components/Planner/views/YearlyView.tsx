@@ -1,5 +1,6 @@
 import { cn } from '@/src/lib/utils';
 import { ThemeType } from '../types';
+import { CheckCircle2 } from 'lucide-react';
 
 interface YearlyViewProps {
   year: number;
@@ -7,7 +8,7 @@ interface YearlyViewProps {
   data?: { 
     months: { [monthIndex: number]: string[] }; 
     bucketList: string[]; 
-    priorities: string[]; 
+    priorities: ({ text: string; completed: boolean } | string)[]; 
   };
   onUpdate: (year: string, updates: any) => void;
   theme: ThemeType;
@@ -22,7 +23,11 @@ export default function YearlyView({ year, onMonthSelect, data, onUpdate, theme 
   const yearStr = year.toString();
   const months = data?.months || {};
   const bucketList = data?.bucketList || Array(5).fill('');
-  const priorities = data?.priorities || Array(5).fill('');
+  const rawPriorities = data?.priorities || Array(5).fill({ text: '', completed: false });
+  const priorities = rawPriorities.map(p => {
+    if (typeof p === 'string') return { text: p, completed: false };
+    return p;
+  });
   
   return (
     <div className="flex flex-col h-full space-y-12">
@@ -39,7 +44,7 @@ export default function YearlyView({ year, onMonthSelect, data, onUpdate, theme 
         )}>{year}</span>
       </div>
 
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {MONTH_NAMES.map((month, mIdx) => {
           const lines = months[mIdx] || Array(6).fill('');
           const bgColor = ['#b2d8e9', '#f9bcd3', '#d1c1dc', '#ffd9a1'][mIdx % 4];
@@ -81,7 +86,7 @@ export default function YearlyView({ year, onMonthSelect, data, onUpdate, theme 
       </div>
 
       {/* New Sections: Bucket List & Priorities */}
-      <div className="grid grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
         <div className={cn(
           "p-8 rounded-[2.5rem] shadow-lg transition-all duration-500 border-4",
           theme === 'light' && "bg-[#f9bcd3] border-white shadow-[#f9bcd3]/20",
@@ -92,7 +97,7 @@ export default function YearlyView({ year, onMonthSelect, data, onUpdate, theme 
             "text-2xl font-display font-black uppercase tracking-tight mb-4 transition-all duration-500",
             theme === 'dark' ? "text-white" : (theme === 'medium' ? "text-slate-700" : "text-white")
           )}>
-            2026 Bucket List
+            {year} Dreams
           </h3>
           <div className="space-y-2">
             {bucketList.map((item, idx) => (
@@ -137,13 +142,25 @@ export default function YearlyView({ year, onMonthSelect, data, onUpdate, theme 
           <div className="space-y-2">
             {priorities.map((item, idx) => (
               <div key={idx} className="flex items-center gap-4">
-                <div className={cn("w-4 h-4 rounded-lg", theme === 'dark' ? "bg-white/10" : "bg-white/30")} />
+                <button 
+                  onClick={() => {
+                    const newList = [...priorities];
+                    newList[idx] = { ...item, completed: !item.completed };
+                    onUpdate(yearStr, { priorities: newList });
+                  }}
+                  className={cn(
+                    "w-6 h-6 rounded-lg flex items-center justify-center border-2 transition-all",
+                    item.completed ? "bg-green-500 border-green-500 text-white" : (theme === 'dark' ? "border-white/20 bg-white/5" : "border-white/50 bg-white/30")
+                  )}
+                >
+                  {item.completed && <CheckCircle2 size={16} className="stroke-[4]" />}
+                </button>
                 <input 
                   type="text"
-                  value={item}
+                  value={item.text}
                   onChange={(e) => {
                     const newList = [...priorities];
-                    newList[idx] = e.target.value;
+                    newList[idx] = { ...item, text: e.target.value };
                     onUpdate(yearStr, { priorities: newList });
                   }}
                   placeholder="Focus area..."
@@ -151,7 +168,8 @@ export default function YearlyView({ year, onMonthSelect, data, onUpdate, theme 
                     "flex-1 border-b-2 rounded-xl px-4 py-2 font-sans font-bold transition-all duration-500 outline-none",
                     theme === 'light' && "bg-white/20 border-white/30 text-white placeholder:text-white/40 focus:bg-white/30 focus:border-white",
                     theme === 'dark' && "bg-white/5 border-white/10 text-white placeholder:text-white/10 focus:bg-white/10 focus:border-white/30",
-                    theme === 'medium' && "bg-slate-50 border-slate-100 text-slate-600 placeholder:text-slate-300 focus:bg-white"
+                    theme === 'medium' && "bg-slate-50 border-slate-100 text-slate-600 placeholder:text-slate-300 focus:bg-white",
+                    item.completed && "opacity-50 line-through"
                   )}
                 />
               </div>

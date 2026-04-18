@@ -113,7 +113,9 @@ export function usePlannerData() {
       return;
     }
     const userDoc = doc(db, 'users', user.uid);
-    await setDoc(userDoc, newData);
+    // Sanitize undefined fields which Firestore rejects
+    const sanitizedData = JSON.parse(JSON.stringify(newData));
+    await setDoc(userDoc, sanitizedData);
   }, [user]);
 
   const updateOwnerName = useCallback((name: string) => {

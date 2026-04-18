@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Stage, Layer, Rect, Circle, Text, Transformer, Image as KonvaImage, Star, RegularPolygon, Path } from 'react-konva';
+import { Html } from 'react-konva-utils';
 import useImage from 'use-image';
-import { Type, Square, Circle as CircleIcon, Image as ImageIcon, Trash2, RotateCcw, MousePointer2, Sticker, Star as StarIcon, Triangle as TriangleIcon, Heart as HeartIcon, Hexagon } from 'lucide-react';
+import { Type, Square, Circle as CircleIcon, Image as ImageIcon, Trash2, RotateCcw, MousePointer2, Sticker, Star as StarIcon, Triangle as TriangleIcon, Heart as HeartIcon, Hexagon, Download } from 'lucide-react';
 import { VisionBoardItem, ThemeType } from '../types';
 import { cn } from '@/src/lib/utils';
+import * as htmlToImage from 'html-to-image';
 
 interface VisionViewProps {
   month: number;
@@ -13,7 +15,7 @@ interface VisionViewProps {
   theme: ThemeType;
 }
 
-const STICKERS = ['✨', '🌸', '💫', '🌈', '💖', '🍀', '🌟', '🦄', '🎀', '🍭', '🦋', '🎈', '🔥', '👑', '💎', '🚀'];
+const STICKERS = ['✨', '🔮', '🧸', '🪐', '🌸', '🎟️', '🎀', '🍒', '🦋', '🍀', '🍓', '🧿', '🤍', '🌙', '🌊', '🍷', '🥂', '🧚‍♀️', '🖼️', '💌'];
 
 const URLImage = ({ item, isSelected, onSelect, onChange }: { 
   item: VisionBoardItem; 
@@ -90,7 +92,35 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleAddField = (type: string, src?: string, text?: string) => {
+  const handleExport = async () => {
+    if (!containerRef.current) return;
+    
+    // De-select items so selection box doesn't appear in the image
+    setSelectedId(null);
+    setEditingId(null);
+    
+    // Short wait to ensure selection is gone
+    setTimeout(async () => {
+      try {
+        const dataUrl = await htmlToImage.toPng(containerRef.current as HTMLElement, {
+          quality: 1.0,
+          pixelRatio: 2, 
+          style: {
+             background: 'transparent'
+          }
+        });
+        
+        const link = document.createElement('a');
+        link.download = `dream-board-${month}-${year}.png`;
+        link.href = dataUrl;
+        link.click();
+      } catch (err) {
+        console.error("Failed to export image", err);
+      }
+    }, 150);
+  };
+
+  const handleAddField = (type: string, src?: string, text?: string, customFontSize?: number) => {
     const defaultFill = {
       text: theme === 'dark' ? '#FFFFFF' : '#000000',
       circle: '#b2d8e9',
@@ -101,16 +131,19 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
       heart: '#f9bcd3'
     }[type] || '#f9bcd3';
 
+    // Add a slight random offset so multiple additions don't perfectly stack
+    const offset = Math.floor(Math.random() * 40) - 20;
+
     const newItem: VisionBoardItem = {
       id: Math.random().toString(36).substr(2, 9),
       type: type as any,
-      x: containerSize.width / 2 - 50,
-      y: containerSize.height / 2 - 50,
+      x: containerSize.width / 2 - 50 + offset,
+      y: containerSize.height / 2 - 50 + offset,
       width: 100,
       height: 100,
       fill: defaultFill,
       text: text || (type === 'text' ? 'New Text' : undefined),
-      fontSize: type === 'text' || text ? 30 : undefined,
+      fontSize: customFontSize || (type === 'text' || text ? 30 : undefined),
       src,
       rotation: 0,
       scaleX: 1,
@@ -188,7 +221,7 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
           "text-5xl font-display font-black uppercase tracking-tight transition-all duration-500",
           theme === 'dark' ? "text-white" : "text-black"
         )}>
-          Vision Board
+          Dream Board
         </h2>
         <span className={cn(
           "font-display font-black text-2xl uppercase transition-all duration-500",
@@ -198,10 +231,10 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
         </span>
       </div>
 
-      <div className="flex flex-1 gap-6 overflow-hidden">
+      <div className="flex flex-col md:flex-row flex-1 gap-4 md:gap-6 overflow-hidden">
         {/* Toolbar */}
         <div className={cn(
-          "w-20 rounded-[2rem] shadow-xl border-4 flex flex-col items-center py-6 space-y-4 transition-all duration-500",
+          "w-full md:w-20 rounded-[2rem] shadow-xl border-4 flex flex-row md:flex-col items-center justify-between md:justify-start py-4 px-4 md:py-6 md:px-0 md:space-y-4 transition-all duration-500 overflow-x-auto no-scrollbar",
           theme === 'light' && "bg-white border-[#FFF9F2]",
           theme === 'dark' && "bg-white/5 border-white/10",
           theme === 'medium' && "bg-white border-slate-200"
@@ -209,7 +242,7 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
           <button 
             onClick={() => setSelectedId(null)}
             className={cn(
-              "p-3 rounded-2xl transition-all", 
+              "p-3 rounded-2xl transition-all shrink-0", 
               !selectedId 
                 ? (theme === 'dark' ? "bg-[#5BC0F8] text-black" : "bg-[#b2d8e9] text-white") 
                 : (theme === 'dark' ? "text-white/40 hover:bg-white/10" : "text-[#b2d8e9] hover:bg-[#b2d8e9]/10")
@@ -219,105 +252,110 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
             <MousePointer2 size={24} />
           </button>
           
-          <div className={cn("w-8 h-1 rounded-full", theme === 'dark' ? "bg-white/10" : "bg-[#FFF9F2]")} />
+          <div className={cn("w-1 h-8 md:w-8 md:h-1 rounded-full shrink-0 mx-2 md:mx-0", theme === 'dark' ? "bg-white/10" : "bg-[#FFF9F2]")} />
           
-          <button 
-            onClick={() => handleAddField('text')}
-            className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#D1C1DC] hover:bg-white/10" : "text-[#d1c1dc] hover:bg-[#d1c1dc]/10")}
-            title="Add Text"
-          >
-            <Type size={24} />
-          </button>
-          
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#f9bcd3] hover:bg-white/10" : "text-[#f9bcd3] hover:bg-[#f9bcd3]/10")}
-            title="Add Image"
-          >
-            <ImageIcon size={24} />
-          </button>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            className="hidden" 
-            accept="image/*" 
-            onChange={handleImageUpload} 
-          />
-          
-          <button 
-            onClick={() => handleAddField('rect')}
-            className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#ffd9a1] hover:bg-white/10" : "text-[#ffd9a1] hover:bg-[#ffd9a1]/10")}
-            title="Add Shape"
-          >
-            <Square size={24} />
-          </button>
-          
-          <button 
-            onClick={() => handleAddField('circle')}
-            className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#b2d8e9] hover:bg-white/10" : "text-[#b2d8e9] hover:bg-[#b2d8e9]/10")}
-            title="Add Circle"
-          >
-            <CircleIcon size={24} />
-          </button>
-
-          <button 
-            onClick={() => handleAddField('star')}
-            className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#ffd9a1] hover:bg-white/10" : "text-[#ffd9a1] hover:bg-[#ffd9a1]/10")}
-            title="Add Star"
-          >
-            <StarIcon size={24} />
-          </button>
-
-          <button 
-            onClick={() => handleAddField('triangle')}
-            className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#d1c1dc] hover:bg-white/10" : "text-[#d1c1dc] hover:bg-[#d1c1dc]/10")}
-            title="Add Triangle"
-          >
-            <TriangleIcon size={24} />
-          </button>
-
-          <button 
-            onClick={() => handleAddField('hexagon')}
-            className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#b2d8e9] hover:bg-white/10" : "text-[#b2d8e9] hover:bg-[#b2d8e9]/10")}
-            title="Add Hexagon"
-          >
-            <Hexagon size={24} />
-          </button>
-
-          <button 
-            onClick={() => handleAddField('heart')}
-            className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#f9bcd3] hover:bg-white/10" : "text-[#f9bcd3] hover:bg-[#f9bcd3]/10")}
-            title="Add Heart"
-          >
-            <HeartIcon size={24} />
-          </button>
-
-          <div className="group relative">
+          <div className="flex flex-row md:flex-col items-center space-x-2 md:space-x-0 md:space-y-4 shrink-0">
             <button 
-              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#f9bcd3] hover:bg-white/10" : "text-[#f9bcd3] hover:bg-[#f9bcd3]/10")}
-              title="Add Sticker"
+              onClick={() => handleAddField('text')}
+              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#D1C1DC] hover:bg-white/10" : "text-[#d1c1dc] hover:bg-[#d1c1dc]/10")}
+              title="Add Text"
             >
-              <Sticker size={24} />
+              <Type size={24} />
             </button>
-            <div className={cn(
-              "absolute left-full ml-4 top-0 shadow-2xl rounded-2xl p-4 grid grid-cols-4 gap-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all z-50 w-48 border-4",
-              theme === 'light' && "bg-white border-[#FFF9F2]",
-              theme === 'dark' && "bg-slate-900 border-white/10",
-              theme === 'medium' && "bg-white border-slate-200"
-            )}>
-              {STICKERS.map(s => (
-                <button 
-                  key={s} 
-                  onClick={() => handleAddField('text', undefined, s)}
-                  className="text-2xl hover:scale-125 transition-transform"
-                >
-                  {s}
-                </button>
-              ))}
+            
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#f9bcd3] hover:bg-white/10" : "text-[#f9bcd3] hover:bg-[#f9bcd3]/10")}
+              title="Add Image"
+            >
+              <ImageIcon size={24} />
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handleImageUpload} 
+            />
+            
+            <button 
+              onClick={() => handleAddField('rect')}
+              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#ffd9a1] hover:bg-white/10" : "text-[#ffd9a1] hover:bg-[#ffd9a1]/10")}
+              title="Add Shape"
+            >
+              <Square size={24} />
+            </button>
+            
+            <button 
+              onClick={() => handleAddField('circle')}
+              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#b2d8e9] hover:bg-white/10" : "text-[#b2d8e9] hover:bg-[#b2d8e9]/10")}
+              title="Add Circle"
+            >
+              <CircleIcon size={24} />
+            </button>
+
+            <button 
+              onClick={() => handleAddField('star')}
+              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#ffd9a1] hover:bg-white/10" : "text-[#ffd9a1] hover:bg-[#ffd9a1]/10")}
+              title="Add Star"
+            >
+              <StarIcon size={24} />
+            </button>
+
+            <button 
+              onClick={() => handleAddField('triangle')}
+              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#d1c1dc] hover:bg-white/10" : "text-[#d1c1dc] hover:bg-[#d1c1dc]/10")}
+              title="Add Triangle"
+            >
+              <TriangleIcon size={24} />
+            </button>
+
+            <button 
+              onClick={() => handleAddField('hexagon')}
+              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#b2d8e9] hover:bg-white/10" : "text-[#b2d8e9] hover:bg-[#b2d8e9]/10")}
+              title="Add Hexagon"
+            >
+              <Hexagon size={24} />
+            </button>
+
+            <button 
+              onClick={() => handleAddField('heart')}
+              className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#f9bcd3] hover:bg-white/10" : "text-[#f9bcd3] hover:bg-[#f9bcd3]/10")}
+              title="Add Heart"
+            >
+              <HeartIcon size={24} />
+            </button>
+
+            <div className="group relative">
+              <button 
+                className={cn("p-3 rounded-2xl transition-all", theme === 'dark' ? "text-[#f9bcd3] hover:bg-white/10" : "text-[#f9bcd3] hover:bg-[#f9bcd3]/10")}
+                title="Add Sticker"
+              >
+                <Sticker size={24} />
+              </button>
+              <div className={cn(
+                "absolute left-0 bottom-full mb-4 md:left-full md:bottom-auto md:ml-4 md:top-0 shadow-2xl rounded-2xl p-4 grid grid-cols-5 gap-3 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all z-50 w-64 border-4",
+                theme === 'light' && "bg-white border-[#FFF9F2]",
+                theme === 'dark' && "bg-slate-900 border-white/10",
+                theme === 'medium' && "bg-white border-slate-200"
+              )}>
+                {STICKERS.map(s => (
+                  <button 
+                    key={s} 
+                    onPointerDown={(e) => {
+                      e.preventDefault(); // prevent losing focus
+                      handleAddField('text', undefined, s, 60);
+                    }}
+                    className="text-3xl hover:scale-125 transition-transform"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           
-          <div className="mt-auto space-y-4 flex flex-col items-center">
+          <div className="flex flex-row md:flex-col items-center md:mt-auto space-x-2 md:space-x-0 md:space-y-4 shrink-0 pl-4 md:pl-0 border-l-2 md:border-l-0 md:border-t-2 border-slate-100 dark:border-white/10 md:pt-4 ml-2 md:ml-0">
             {selectedId && (
               <button 
                 onClick={handleDelete}
@@ -330,6 +368,16 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
                 <Trash2 size={24} />
               </button>
             )}
+            <button 
+              onClick={handleExport}
+              className={cn(
+                "p-3 rounded-2xl transition-all",
+                theme === 'dark' ? "text-[#b2d8e9] hover:bg-white/10" : "text-[#b2d8e9] hover:bg-[#b2d8e9]/10"
+              )}
+              title="Export as Image"
+            >
+              <Download size={24} />
+            </button>
             <button 
               onClick={() => onUpdate([])}
               className={cn(
@@ -427,6 +475,52 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
                       />
                     );
                   case 'text':
+                    const isEditing = editingId === item.id;
+                    if (isEditing) {
+                      return (
+                        <Html
+                          key={item.id}
+                          divProps={{
+                            style: {
+                              position: 'absolute',
+                              top: `${item.y}px`,
+                              left: `${item.x}px`,
+                              transform: `rotate(${item.rotation || 0}deg) scale(${item.scaleX || 1}, ${item.scaleY || 1})`,
+                              transformOrigin: 'top left',
+                            },
+                          }}
+                        >
+                          <textarea
+                            value={tempText}
+                            onChange={(e) => setTempText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                finishEditing();
+                              }
+                            }}
+                            onBlur={finishEditing}
+                            autoFocus
+                            style={{
+                              fontSize: `${item.fontSize || 30}px`,
+                              fontFamily: 'Quicksand',
+                              fontWeight: 'bold',
+                              color: item.fill,
+                              background: 'transparent',
+                              border: 'none',
+                              outline: 'none',
+                              resize: 'none',
+                              margin: 0,
+                              padding: 0,
+                              lineHeight: 1,
+                              overflow: 'visible',
+                              width: '300px', // allow some room
+                              height: '150px'
+                            }}
+                          />
+                        </Html>
+                      );
+                    }
                     return (
                       <Text 
                         key={item.id} 
@@ -472,70 +566,11 @@ export default function VisionView({ month, year, items, onUpdate, theme }: Visi
           </Stage>
           
           <div className={cn(
-            "absolute bottom-6 left-1/2 -translate-x-1/2 px-6 py-2.5 rounded-full font-display font-black text-xs uppercase tracking-widest shadow-xl transition-all",
+            "absolute bottom-6 left-1/2 -translate-x-1/2 px-6 py-2.5 rounded-full font-display font-black text-xs uppercase tracking-widest shadow-xl transition-all pointer-events-none",
             theme === 'dark' ? "bg-[#5BC0F8] text-black shadow-[#5BC0F8]/20" : "bg-[#b2d8e9] text-white shadow-[#b2d8e9]/30"
           )}>
              Double-click text to edit • Drag & Resize
           </div>
-
-          {editingId && (
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className={cn(
-                "p-8 rounded-[3rem] shadow-2xl space-y-6 w-full max-w-md border-8 animate-in zoom-in duration-200 transition-all",
-                theme === 'light' && "bg-white border-[#FFF9F2]",
-                theme === 'dark' && "bg-slate-900 border-white/10",
-                theme === 'medium' && "bg-white border-slate-200"
-              )}>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-black uppercase text-[#f9bcd3] tracking-[0.2em]">Live Edit</p>
-                  <h3 className={cn("text-2xl font-display font-black", theme === 'dark' ? "text-white" : "text-slate-800")}>Update Content</h3>
-                </div>
-                <textarea
-                  autoFocus
-                  className={cn(
-                    "w-full h-32 p-6 rounded-[2rem] border-4 outline-none font-display font-black text-xl transition-all resize-none shadow-inner",
-                    theme === 'light' && "bg-[#FFF9F2] border-transparent focus:border-[#b2d8e9] text-slate-700 placeholder:text-slate-300",
-                    theme === 'dark' && "bg-white/5 border-white/10 focus:border-[#FFCC00] text-white placeholder:text-white/10",
-                    theme === 'medium' && "bg-slate-50 border-slate-100 focus:border-slate-300 text-slate-700 placeholder:text-slate-300"
-                  )}
-                  value={tempText}
-                  placeholder="Type something magical..."
-                  onChange={(e) => setTempText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      finishEditing();
-                    }
-                    if (e.key === 'Escape') {
-                      setEditingId(null);
-                    }
-                  }}
-                />
-                <div className="flex gap-3">
-                  <button 
-                    onClick={() => setEditingId(null)}
-                    className={cn(
-                      "flex-1 py-4 rounded-2xl font-display font-black uppercase tracking-widest transition-all",
-                      theme === 'dark' ? "bg-white/5 text-white/40 hover:bg-white/10" : "bg-slate-100 text-slate-400 hover:bg-slate-200"
-                    )}
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={finishEditing}
-                    className={cn(
-                      "flex-[1.5] py-4 rounded-2xl font-display font-black uppercase tracking-widest shadow-lg transition-all",
-                      theme === 'light' && "bg-[#b2d8e9] text-white shadow-[#b2d8e9]/30 hover:scale-105 active:scale-95",
-                      theme === 'dark' && "bg-[#5BC0F8] text-black shadow-[#5BC0F8]/20 hover:scale-105 active:scale-95",
-                      theme === 'medium' && "bg-slate-700 text-white shadow-none hover:bg-slate-800"
-                    )}
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { CurrentDayData, CheckItem, ThemeType } from '../types';
 import { cn } from '@/src/lib/utils';
 import { motion } from 'motion/react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import TextareaAutosize from 'react-textarea-autosize';
 
 interface CurrentViewProps {
   data: CurrentDayData;
@@ -219,56 +220,61 @@ export default function CurrentView({ data, onUpdate, theme }: CurrentViewProps)
                       <div 
                         ref={provided.innerRef} 
                         {...provided.draggableProps} 
-                        className="flex items-center space-x-3 animate-in slide-in-from-left duration-300 transition-all"
+                        className="flex flex-col sm:flex-row sm:items-center gap-3 sm:space-x-3 animate-in slide-in-from-left duration-300 transition-all"
                       >
-                        <div {...provided.dragHandleProps} className="text-white/30 hover:text-white cursor-grab active:cursor-grabbing">
-                          <GripVertical size={20} />
+                        <div className="flex items-center space-x-2 sm:space-x-3">
+                          <div {...provided.dragHandleProps} className="text-white/30 hover:text-white cursor-grab active:cursor-grabbing">
+                            <GripVertical size={20} />
+                          </div>
+                          <input
+                            type="number"
+                            value={task.count}
+                            onChange={(e) => updateTaskCount(task.id, e.target.value)}
+                            className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-center border-none outline-none appearance-none transition-all",
+                              theme === 'light' && "bg-white/30 text-white",
+                              theme === 'dark' && "bg-white/10 text-white border border-white/20",
+                              theme === 'medium' && "bg-white text-slate-400 border border-slate-200 shadow-sm"
+                            )}
+                          />
                         </div>
-                        <input
-                          type="number"
-                          value={task.count}
-                          onChange={(e) => updateTaskCount(task.id, e.target.value)}
-                          className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-center border-none outline-none appearance-none transition-all",
-                            theme === 'light' && "bg-white/30 text-white",
-                            theme === 'dark' && "bg-white/10 text-white border border-white/20",
-                            theme === 'medium' && "bg-white text-slate-400 border border-slate-200 shadow-sm"
-                          )}
-                        />
                         <div className={cn(
-                          "flex-1 rounded-xl px-4 py-2.5 shadow-sm border-2 flex items-center transition-all",
+                          "flex-1 rounded-xl px-4 py-2.5 shadow-sm border-2 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0 transition-all",
                           theme === 'light' && "bg-white border-white",
                           theme === 'dark' && "bg-white/5 border-white/10",
                           theme === 'medium' && "bg-white border-slate-200"
                         )}>
-                          <input
+                          <TextareaAutosize
                             value={task.text}
                             onChange={(e) => updateTaskText(task.id, e.target.value)}
                             placeholder="What to do...?"
                             className={cn(
-                              "flex-1 bg-transparent border-none outline-none font-display font-black text-lg placeholder:text-slate-300 transition-all",
+                              "flex-1 w-full bg-transparent border-none outline-none font-display font-black text-lg placeholder:text-slate-300 transition-all resize-none overflow-hidden py-0",
                               theme === 'dark' ? "text-white" : "text-slate-700",
                               task.completed && "line-through opacity-50 transition-all"
                             )}
+                            minRows={1}
                           />
-                          <button 
-                            onClick={() => toggleTask(task.id)}
-                            className={cn(
-                              "w-10 h-5 rounded-full relative transition-colors duration-300 ml-3 border-2",
-                              theme === 'dark' ? "border-white/20" : "border-[#f0f0f0]",
-                              task.completed 
-                                ? (theme === 'dark' ? "bg-[#FFCC00]" : "bg-[#b2d8e9]") 
-                                : "bg-slate-200"
-                            )}
-                          >
-                            <div className={cn(
-                              "absolute top-0.5 bottom-0.5 w-3.5 rounded-full bg-white shadow-sm transition-all duration-300",
-                              task.completed ? "right-0.5" : "left-0.5"
-                            )} />
-                          </button>
-                          <button onClick={() => removeTask(task.id)} className="ml-3 text-slate-300 hover:text-red-400">
-                            <X size={18} />
-                          </button>
+                          <div className="flex items-center w-full justify-between sm:w-auto sm:justify-start">
+                            <button 
+                              onClick={() => toggleTask(task.id)}
+                              className={cn(
+                                "w-10 h-5 rounded-full relative transition-colors duration-300 sm:ml-3 border-2 shrink-0",
+                                theme === 'dark' ? "border-white/20" : "border-[#f0f0f0]",
+                                task.completed 
+                                  ? (theme === 'dark' ? "bg-[#FFCC00]" : "bg-[#b2d8e9]") 
+                                  : "bg-slate-200"
+                              )}
+                            >
+                              <div className={cn(
+                                "absolute top-0.5 bottom-0.5 w-3.5 rounded-full bg-white shadow-sm transition-all duration-300",
+                                task.completed ? "right-0.5" : "left-0.5"
+                              )} />
+                            </button>
+                            <button onClick={() => removeTask(task.id)} className="ml-3 sm:ml-3 text-slate-300 hover:text-red-400 shrink-0">
+                              <X size={18} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -383,7 +389,7 @@ export default function CurrentView({ data, onUpdate, theme }: CurrentViewProps)
                           >
                             {item.completed && <CheckCircle2 size={16} className="stroke-[4]" />}
                           </button>
-                          <input
+                          <TextareaAutosize
                             value={item.text}
                             placeholder="Add task..."
                             onChange={(e) => {
@@ -391,10 +397,11 @@ export default function CurrentView({ data, onUpdate, theme }: CurrentViewProps)
                               onUpdate({ ...data, miniChecklist: newItems });
                             }}
                             className={cn(
-                              "flex-1 bg-transparent border-none outline-none font-bold text-base",
+                              "flex-1 bg-transparent border-none outline-none font-bold text-base resize-none overflow-hidden py-0",
                               theme === 'dark' ? "text-white" : "text-slate-600",
                               item.completed && "opacity-40 line-through"
                             )}
+                            minRows={1}
                           />
                           <button 
                             onClick={() => {
@@ -420,19 +427,11 @@ export default function CurrentView({ data, onUpdate, theme }: CurrentViewProps)
       {/* Footer Controls */}
       <div className="flex items-center justify-end space-x-2 pt-2">
         <button 
-          onClick={handleReset}
-          className={cn(
-            "flex items-center space-x-1 px-3 py-1.5 border rounded-lg font-display font-black text-[10px] transition-all shadow-sm",
-            theme === 'dark' 
-              ? "bg-white/5 border-white/10 text-white/40 hover:bg-white/10" 
-              : "bg-white border-slate-200 text-slate-400 hover:bg-slate-50"
-          )}
-        >
-          <RotateCcw size={12} />
-          <span>RESET</span>
-        </button>
-        <button 
-          onClick={handleClearAll}
+          onClick={() => {
+            if (window.confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+              handleClearAll();
+            }
+          }}
           className={cn(
             "flex items-center space-x-1 px-3 py-1.5 border rounded-lg font-display font-black text-[10px] transition-all shadow-sm",
             theme === 'dark' 

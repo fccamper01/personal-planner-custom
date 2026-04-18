@@ -60,22 +60,22 @@ export default function ProjectsView({ projects, onUpdate, theme }: ProjectsView
     return (
       <div className="w-full flex flex-col h-full overflow-hidden space-y-6">
         {/* Subpage Header */}
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 space-x-0 sm:space-x-4">
           <button 
             onClick={() => setActiveProjectId(null)}
             className={cn(
-              "p-3 rounded-2xl flex items-center justify-center transition-all shadow-sm border-2",
+              "p-3 rounded-2xl flex items-center justify-center transition-all shadow-sm border-2 self-start",
               theme === 'dark' ? "bg-white/10 text-white border-white/20 hover:bg-white/20" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
             )}
           >
             <ArrowLeft size={24} />
           </button>
-          <div className="flex-1">
+          <div className="flex-1 w-full relative group">
             <input 
               value={activeProject.title}
               onChange={(e) => updateActiveProject({ title: e.target.value })}
               className={cn(
-                "bg-transparent border-none outline-none font-display font-black text-4xl w-full",
+                "bg-transparent border-none outline-none font-display font-black text-3xl sm:text-4xl w-full pr-12 sm:pr-0",
                 theme === 'dark' ? "text-white" : "text-black"
               )}
               placeholder="Project Title"
@@ -86,10 +86,17 @@ export default function ProjectsView({ projects, onUpdate, theme }: ProjectsView
                 Updated {format(new Date(activeProject.updatedAt), 'MMM dd, yyyy')}
               </span>
             </div>
+            
+            <button 
+              onClick={(e) => deleteProject(activeProject.id, e)}
+              className="absolute right-0 top-0 sm:relative sm:top-auto sm:ml-4 p-3 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all border-2 border-transparent hover:border-red-100 hidden sm:block"
+            >
+              <Trash2 size={24} />
+            </button>
           </div>
           <button 
             onClick={(e) => deleteProject(activeProject.id, e)}
-            className="p-3 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all border-2 border-transparent hover:border-red-100"
+            className="p-3 rounded-2xl text-red-400 hover:bg-red-50 hover:text-red-600 transition-all border-2 border-transparent hover:border-red-100 block sm:hidden self-end"
           >
             <Trash2 size={24} />
           </button>

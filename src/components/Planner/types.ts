@@ -125,7 +125,7 @@ export interface PlannerData {
     [year: string]: {
       months: { [monthIndex: number]: string[] }; // Array of 6 lines for each month
       bucketList: string[]; // Yearly bucket list
-      priorities: string[]; // Yearly priorities
+      priorities: ({ text: string; completed: boolean } | string)[]; // Yearly priorities
     };
   };
   monthly: {

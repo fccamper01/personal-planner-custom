@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { 
   Home, 
-  Target, 
+  Cloud, 
   GraduationCap, 
   Lightbulb,
   Zap, 
@@ -51,7 +51,7 @@ const ICONS = [
   { id: 'current', icon: Zap },
   { id: 'chores', icon: Sparkles },
   { id: 'projects', icon: FolderOpen },
-  { id: 'vision', icon: Target },
+  { id: 'vision', icon: Cloud },
   { id: 'study', icon: GraduationCap },
   { id: 'business', icon: Lightbulb },
   { id: 'books', icon: Bookmark },
@@ -86,25 +86,25 @@ export default function PlannerLayout({
         
         {/* Content Page (Full Width) */}
         <div className={cn(
-          "flex-1 relative p-6 md:p-12 lg:p-16 flex flex-col overflow-auto custom-scrollbar transition-colors duration-500",
+          "flex-1 relative p-4 sm:p-6 md:p-12 lg:p-16 flex flex-col overflow-auto custom-scrollbar transition-colors duration-500",
           theme === 'light' && "text-slate-800",
           theme === 'dark' && "text-white",
           theme === 'medium' && "text-slate-700"
         )}>
           {/* Top Navigation Icons */}
-          <div className="flex justify-center md:justify-end space-x-4 md:space-x-6 mb-8 md:mb-12">
+          <div className="flex justify-start md:justify-end gap-2 sm:gap-4 md:gap-6 mb-8 md:mb-12 overflow-x-auto no-scrollbar pb-4 md:pb-0 snap-x w-full">
             {ICONS.map(({ id, icon: Icon }) => (
               <button
                 key={id}
                 onClick={() => onViewChange(id as ViewType)}
                 className={cn(
-                  "p-3 md:p-4 transition-all duration-300 rounded-[1.5rem]",
+                  "p-3 md:p-4 transition-all duration-300 rounded-[1.5rem] shrink-0 snap-center",
                   activeView === id 
-                    ? (theme === 'dark' ? 'text-black bg-[#FFCC00] scale-110 shadow-lg' : 'text-white bg-[#b2d8e9] scale-110 shadow-lg')
+                    ? (theme === 'dark' ? 'text-black bg-[#FFCC00] scale-105 shadow-lg' : 'text-white bg-[#b2d8e9] scale-105 shadow-lg')
                     : (theme === 'dark' ? 'text-white/40 hover:text-white hover:bg-white/10' : 'text-[#d1c1dc] hover:text-[#b2d8e9] hover:bg-[#b2d8e9]/10')
                 )}
               >
-                <Icon size={28} className="md:w-8 md:h-8" strokeWidth={2.5} />
+                <Icon size={24} className="sm:w-7 sm:h-7 md:w-8 md:h-8" strokeWidth={2.5} />
               </button>
             ))}
           </div>
