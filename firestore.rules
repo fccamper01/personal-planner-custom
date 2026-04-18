@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation for PlannerData
+    function isValidPlannerData(data) {
+      return data.ownerName is string && data.ownerName.size() <= 100
+        && data.current is map
+        && (!('businessIdeas' in data) || data.businessIdeas is list)
+        && (!('yearly' in data) || data.yearly is map)
+        && (!('monthly' in data) || data.monthly is map)
+        && (!('weekly' in data) || data.weekly is map)
+        && (!('daily' in data) || data.daily is map)
+        && (!('study' in data) || data.study is map)
+        && (!('visionBoards' in data) || data.visionBoards is map);
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      
+      allow create: if isOwner(userId) 
+        && isValidPlannerData(incoming())
+        && incoming().keys().hasAll(['ownerName', 'current'])
+        && incoming().keys().size() >= 2;
+
+      allow update: if isOwner(userId) 
+        && isValidPlannerData(incoming())
+        && incoming().ownerName == existing().ownerName; // ownerName is immutable for now
+
+      allow delete: if isOwner(userId);
+    }
+  }
+}

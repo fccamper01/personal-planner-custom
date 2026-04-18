@@ -1,0 +1,27 @@
+{
+  "entities": {
+    "PlannerData": {
+      "title": "Planner Data",
+      "description": "Full application state for a user",
+      "type": "object",
+      "properties": {
+        "ownerName": { "type": "string" },
+        "yearly": { "type": "object" },
+        "monthly": { "type": "object" },
+        "weekly": { "type": "object" },
+        "daily": { "type": "object" },
+        "study": { "type": "object" },
+        "current": { "type": "object" },
+        "businessIdeas": { "type": "array", "items": { "type": "string" } },
+        "visionBoards": { "type": "object" }
+      },
+      "required": ["ownerName", "current"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "PlannerData",
+      "description": "User specific planner data"
+    }
+  }
+}
